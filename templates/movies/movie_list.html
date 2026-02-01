@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Фильмы</title>
+</head>
+<body>
+    <h1>Список фильмов</h1>
+
+    {% for movie in movies %}
+        <p>{{ movie.title }}</p>
+    {% empty %}
+        <p>Фильмов нет</p>
+    {% endfor %}
+</body>
+</html>
