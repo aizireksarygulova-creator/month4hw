@@ -1,15 +1,19 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Фильмы</title>
-</head>
-<body>
-    <h1>Список фильмов</h1>
+{% extends "base.html" %}
 
-    {% for movie in movies %}
-        <p>{{ movie.title }}</p>
-    {% empty %}
-        <p>Фильмов нет</p>
-    {% endfor %}
-</body>
-</html>
+{% block content %}
+<h1>Список фильмов</h1>
+
+{% for movie in movies %}
+  <div class="card mb-3" style="max-width: 400px;">
+    <div class="card-body">
+      <h5 class="card-title">{{ movie.title }}</h5>
+      <p>{{ movie.genre }}</p>
+      <p>{{ movie.year }}</p>
+      <a href="/movies/{{ movie.id }}/" class="btn btn-primary">Подробнее</a>
+    </div>
+  </div>
+{% empty %}
+  <p>Фильмов нет</p>
+{% endfor %}
+
+{% endblock %}
