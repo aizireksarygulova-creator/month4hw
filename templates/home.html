@@ -1,13 +1,17 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="d-flex flex-column justify-content-center align-items-center"
-     style="height: 80vh;">
 
-    <h1>Добро пожаловать в Kinopoisk</h1>
-    <p class="text-muted">
-        Нажмите «Фильмы», чтобы посмотреть список
-    </p>
+<h2>Жанры</h2>
 
-</div>
+{% for genre in genres %}
+    <div class="card" style="width:18rem;">
+        <div class="card-body">
+            <h5>{{ genre.name }}</h5>
+            <a href="/movies/?genre_id={{ genre.id }}" class="btn btn-primary">
+                Посмотреть
+            </a>
+        </div>
+    </div>
+{% endfor %}
+
 {% endblock %}

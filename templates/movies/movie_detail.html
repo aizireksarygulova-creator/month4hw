@@ -1,11 +1,19 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <h1>{{ movie.title }}</h1>
+
+{% if movie.image %}
+<img src="{{ movie.image.url }}" width="300">
+{% else %}
+<img src="/media/movies/empty.png" width="300">
+{% endif %}
 
 <p><strong>Год:</strong> {{ movie.year }}</p>
 <p><strong>Жанр:</strong> {{ movie.genre }}</p>
 <p><strong>Описание:</strong> {{ movie.description }}</p>
 
 <a href="/movies/" class="btn btn-secondary">Назад</a>
+
 {% endblock %}
