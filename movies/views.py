@@ -1,5 +1,8 @@
 from django.shortcuts import render, redirect
 from .models import Movie, Genre
+from .forms import CreateMovieForm
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 
 # select * from product;
 # Product.objects.all()
@@ -20,7 +23,7 @@ from .models import Movie, Genre
 # Product.objects.delete()
 
 
-
+@login_required(login_url="/login/")
 def movie_list(request):
     movies = Movie.objects.all()
 
@@ -30,24 +33,29 @@ def movie_list(request):
 
     return render(request, "movies/movie_list.html", {"movies": movies})
 
+@login_required(login_url="/login/")
 def movie_create(request):
     if request.method == "GET":
+        form = CreateMovieForm()
         genres = Genre.objects.all()
-        return render(request, "movies/movie_create.html", {"genres": genres})
+        return render(request, "movies/movie_create.html", {"form": form, "genres": genres})
 
     elif request.method == "POST":
-        print(request.POST)
-        title = request.POST.get("title")
-        description = request.POST.get("description")
-        year = request.POST.get("year")
-        genre_id = request.POST.get("genre")
-        image = request.FILES.get("image")
+        form = CreateMovieForm(request.POST, request.FILES)
 
-        movie = Movie.objects.create(title=title, description=description, year=year, image=image)
+        if form.is_valid():
+            movie = Movie.objects.create(
+                title=form.cleaned_data.get("title"),
+                description=form.cleaned_data.get("description"),
+                year=form.cleaned_data.get("year"),
+                image=form.cleaned_data.get("image"),
+            )
 
-        movie.genre.set([genre_id])
+            movie.genre.set([form.cleaned_data.get("genre")])
 
-        return redirect("/movies/")
+            return redirect("/movies/")
+        return HttpResponse("Error")
+        
 
 
 
