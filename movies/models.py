@@ -12,7 +12,7 @@ class Movie(models.Model):
     title = models.CharField(max_length=200)
     year = models.IntegerField()
     description = models.TextField()
-    genre = models.ManyToManyField(Genre, blank=True)
+    genre = models.ManyToManyField(Genre, blank=True, related_name="movies")
 
     def __str__(self):
         return self.title

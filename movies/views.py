@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from .models import Movie, Genre
-from .forms import CreateMovieForm
+from .forms import CreateMovieForm, SearchForm
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 # select * from product;
 # Product.objects.all()
@@ -22,16 +23,50 @@ from django.contrib.auth.decorators import login_required
 
 # Product.objects.delete()
 
-
 @login_required(login_url="/login/")
 def movie_list(request):
+
     movies = Movie.objects.all()
+    genres = Genre.objects.all()
 
-    genre_id = request.GET.get("genre_id")
-    if genre_id:
-        movies = Movie.objects.filter(genre__id=genre_id)
+    search_query = request.GET.get("search")
+    selected_genres = request.GET.getlist("genre_id")
+    year_choice = request.GET.get("year_choice")
 
-    return render(request, "movies/movie_list.html", {"movies": movies})
+
+    
+    if search_query:
+        movies = movies.filter(
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
+
+    
+    if selected_genres:
+        movies = movies.filter(genre__id__in=selected_genres).distinct()
+
+    
+    if year_choice:
+        if year_choice == "2026":
+            movies = movies.filter(year=2026)
+        elif year_choice == "2025":
+            movies = movies.filter(year=2025)
+        elif year_choice == "2024":
+            movies = movies.filter(year=2024)
+        elif year_choice == "2020_2023":
+            movies = movies.filter(year__gte=2020, year__lte=2023)
+
+    return render(
+        request,
+        "movies/movie_list.html",
+        {
+            "movies": movies,
+            "genres": genres,
+            "selected_genres": selected_genres,
+            "selected_year": year_choice,
+            "search_value": search_query,
+        }
+    )
 
 @login_required(login_url="/login/")
 def movie_create(request):
@@ -51,12 +86,11 @@ def movie_create(request):
                 image=form.cleaned_data.get("image"),
             )
 
-            movie.genre.set([form.cleaned_data.get("genre")])
+            
+            movie.genres.set(form.cleaned_data.get("genre"))
 
             return redirect("/movies/")
-        return HttpResponse("Error")
-        
-
+    return HttpResponse("Error")
 
 
 def movie_detail(request, movie_id):
@@ -64,10 +98,12 @@ def movie_detail(request, movie_id):
         movie = Movie.objects.get(id=movie_id)
         return render(request, "movies/movie_detail.html", context={'movie': movie})
 
+
 def home(request):
     if request.method == "GET":
         genres = Genre.objects.all()
         return render(request, "home.html", {"genres": genres})
+
 
 def movies_by_genre(request, genre_id):
     if request.method == "GET":
