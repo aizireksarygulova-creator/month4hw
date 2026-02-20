@@ -1,5 +1,9 @@
+
+
+from cProfile import Profile
+
 from django import forms
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User 
 
 
 class RegisterForms(forms.Form):
@@ -26,3 +30,13 @@ class RegisterForms(forms.Form):
 class LoginForms(forms.Form):
     username = forms.CharField(required=True)
     password = forms.CharField(required=True)
+
+class UpdateProfileForm(forms.ModelForm):
+    username = forms.CharField(required=True)
+    email = forms.EmailField(required=False)
+    first_name = forms.CharField(required=False)
+    last_name = forms.CharField(required=False)
+    age = forms.IntegerField(required=True)
+    image = forms.ImageField(required=False)
+
+     

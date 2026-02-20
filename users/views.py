@@ -2,8 +2,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from .models import Profile
+from django.contrib.auth.decorators import login_required
 
-from .forms import RegisterForms, LoginForms
+from .forms import RegisterForms, LoginForms, UpdateProfileForm
 
 # Create your views here.
 
@@ -20,10 +22,11 @@ def register(request):
         forms = RegisterForms(request.POST)
         if not forms.is_valid():
             return HttpResponse("Error")
-        User.objects.create_user(
+        user = User.objects.create_user(
             username=forms.cleaned_data.get("username"),  # pyright: ignore[reportArgumentType]
             password=forms.cleaned_data.get("password"),
         )
+        Profile.objects.create(user=user)
     return redirect("/movies/")
 
 
@@ -52,3 +55,34 @@ def login_user(request):
 def logout_user(request):
     logout(request)
     return redirect("/")
+
+@login_required(login_url="/login/")
+def profile(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+
+    return render(
+        request,
+        "users/profile.html",
+        {"profile": profile}
+    )
+def update_profile(request):
+    if request.method == "GET":
+        forms = UpdateProfileForm(request.POST or None)
+        return render(request, "users/update_profile.html", context={"forms": forms})
+
+    if request.method == "POST":
+        forms = UpdateProfileForm(request.POST, request.FILES)
+        if not forms.is_valid():
+            return HttpResponse("Error")
+        request.user.profile.age = forms.cleaned_data.get("age")
+        request.user.profile.image = forms.cleaned_data.get("image")
+
+        request.user.username = forms.cleaned_data.get("username")
+        request.user.email = forms.cleaned_data.get("email")
+        request.user.first_name = forms.cleaned_data.get("first_name")
+        request.user.last_name = forms.cleaned_data.get("last_name")
+
+        request.user.save()
+        request.user.profile.save()
+
+    return redirect("/products/")

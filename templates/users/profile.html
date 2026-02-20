@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-4 text-center">
+                {% if profile.image %}
+                    <img src="{{ profile.image.url }}" class="img-fluid rounded-circle" width="220">
+                {% else %}
+                    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                         class="img-fluid rounded-circle" width="220">
+                {% endif %}
+            </div>
+
+            <div class="col-md-8">
+                <h2 class="mb-3">{{ request.user.username }}</h2>
+
+                <p class="text-muted fs-5">
+                    Возраст: <b>{{ profile.age }}</b>
+                </p>
+
+                <hr>
+
+                <a href="/logout/" class="btn btn-danger">
+                    Выйти
+                </a>
+                <a href="/update_profile/" class="btn btn-primary">
+                    Редактировать профиль
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

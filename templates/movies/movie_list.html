@@ -99,6 +99,24 @@
         {% endfor %}
 
     </div>
+    <div class="d-flex justify-content-center mt-5">
+    <nav>
+        <ul class="pagination">
+
+            {% for page in list_pages %}
+
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?page={{ page }}{% if search_value %}&search={{ search_value }}{% endif %}{% if selected_year %}&year_choice={{ selected_year }}{% endif %}">
+                        {{ page }}
+                    </a>
+                </li>
+
+            {% endfor %}
+
+        </ul>
+    </nav>
+</div>
 
 </div>
 

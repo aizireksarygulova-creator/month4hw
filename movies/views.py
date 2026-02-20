@@ -23,14 +23,26 @@ from django.db.models import Q
 
 # Product.objects.delete()
 
+# Product.objects.all() -> products = [product1, product2, product3, product4, product5, product6, product7, product8, product9, product10]
+# limit = 3
+# page = 1
+# product = products[(page-1)*limit:page*limit]
+# max_page = int(len(products)/limit)
+# срезы = [start:stop]
+#
+# FBV -> Function Based View
+# CBV -> Class Based View
+
+
 @login_required(login_url="/login/")
 def movie_list(request):
 
     movies = Movie.objects.all()
     genres = Genre.objects.all()
 
-    search_query = request.GET.get("search")
+    search_query = request.GET.get("search", "")
     selected_genres = request.GET.getlist("genre_id")
+    selected_genres = [g for g in selected_genres if g]
     year_choice = request.GET.get("year_choice")
 
 
@@ -56,6 +68,22 @@ def movie_list(request):
         elif year_choice == "2020_2023":
             movies = movies.filter(year__gte=2020, year__lte=2023)
 
+    limit = 4
+
+    page = int(request.GET.get("page")) if request.GET.get("page") else 1
+
+    total_movies = len(movies)
+
+    max_page = total_movies // limit
+    if total_movies % limit != 0:
+        max_page += 1
+
+    start = (page - 1) * limit
+    stop = page * limit
+
+    list_pages = range(1, max_page + 1)
+
+    movies = movies[start:stop]
     return render(
         request,
         "movies/movie_list.html",
@@ -65,32 +93,38 @@ def movie_list(request):
             "selected_genres": selected_genres,
             "selected_year": year_choice,
             "search_value": search_query,
+            "list_pages": list_pages,
         }
     )
 
 @login_required(login_url="/login/")
 def movie_create(request):
-    if request.method == "GET":
-        form = CreateMovieForm()
-        genres = Genre.objects.all()
-        return render(request, "movies/movie_create.html", {"form": form, "genres": genres})
 
-    elif request.method == "POST":
-        form = CreateMovieForm(request.POST, request.FILES)
+    user = request.user
+    if user.is_staff:
 
-        if form.is_valid():
-            movie = Movie.objects.create(
-                title=form.cleaned_data.get("title"),
-                description=form.cleaned_data.get("description"),
-                year=form.cleaned_data.get("year"),
-                image=form.cleaned_data.get("image"),
-            )
+        if request.method == "GET":
+            form = CreateMovieForm()
+            genres = Genre.objects.all()
+            return render(request, "movies/movie_create.html", {"form": form, "genres": genres})
+
+        elif request.method == "POST":
+            form = CreateMovieForm(request.POST, request.FILES)
+
+            if form.is_valid():
+                movie = Movie.objects.create(
+                    title=form.cleaned_data.get("title"),
+                    description=form.cleaned_data.get("description"),
+                    year=form.cleaned_data.get("year"),
+                    image=form.cleaned_data.get("image"),
+                )
 
             
-            movie.genres.set(form.cleaned_data.get("genre"))
+                movie.genres.set(form.cleaned_data.get("genre"))
 
-            return redirect("/movies/")
-    return HttpResponse("Error")
+                return redirect("/movies/")
+        return HttpResponse("Error")
+    return HttpResponse("Permission denied")
 
 
 def movie_detail(request, movie_id):

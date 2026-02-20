@@ -19,13 +19,15 @@ from django.urls import path
 from django.conf.urls import static
 from movies.views import home, movie_list, movie_detail, movies_by_genre, movie_create 
 from django.conf import settings
-from users.views import register, login_user, logout_user
+from users.views import register, login_user, logout_user, profile, update_profile
 
 
 users = [
     path("register/", register),
     path("login/", login_user),
     path("logout/", logout_user),
+    path("profile/", profile),
+    path("update_profile/", update_profile),
 ]
 
 urlpatterns = [
