@@ -100,9 +100,6 @@ def movie_list(request):
 @login_required(login_url="/login/")
 def movie_create(request):
 
-    user = request.user
-    if user.is_staff:
-
         if request.method == "GET":
             form = CreateMovieForm()
             genres = Genre.objects.all()
@@ -113,6 +110,7 @@ def movie_create(request):
 
             if form.is_valid():
                 movie = Movie.objects.create(
+                    profile = request.user.profile,
                     title=form.cleaned_data.get("title"),
                     description=form.cleaned_data.get("description"),
                     year=form.cleaned_data.get("year"),
@@ -120,13 +118,18 @@ def movie_create(request):
                 )
 
             
-                movie.genres.set(form.cleaned_data.get("genre"))
+                movie.genre.set(form.cleaned_data.get("genre"))
 
                 return redirect("/movies/")
         return HttpResponse("Error")
-    return HttpResponse("Permission denied")
 
-
+def delete_movie(request, movie_id):
+    movie = Movie.objects.get(id=movie_id)
+    if request.user.profile != movie.profile:
+        return HttpResponse("Permission denied")
+    movie.delete()
+    return redirect("/movies/")
+    
 def movie_detail(request, movie_id):
     if request.method == "GET":
         movie = Movie.objects.get(id=movie_id)

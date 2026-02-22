@@ -1,6 +1,6 @@
 
 
-from cProfile import Profile
+from .models import Profile
 
 from django import forms
 from django.contrib.auth.models import User 
@@ -38,5 +38,12 @@ class UpdateProfileForm(forms.ModelForm):
     last_name = forms.CharField(required=False)
     age = forms.IntegerField(required=True)
     image = forms.ImageField(required=False)
+
+    class Meta:
+        model = Profile
+        fields = [
+            "age",
+            "image",
+        ]
 
      

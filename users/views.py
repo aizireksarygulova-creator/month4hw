@@ -67,13 +67,15 @@ def profile(request):
     )
 def update_profile(request):
     if request.method == "GET":
-        forms = UpdateProfileForm(request.POST or None)
-        return render(request, "users/update_profile.html", context={"forms": forms})
+        forms = UpdateProfileForm()
+        return render(request, "users/update_profile.html", {"forms": forms})
 
     if request.method == "POST":
         forms = UpdateProfileForm(request.POST, request.FILES)
+
         if not forms.is_valid():
             return HttpResponse("Error")
+        
         request.user.profile.age = forms.cleaned_data.get("age")
         request.user.profile.image = forms.cleaned_data.get("image")
 
@@ -85,4 +87,4 @@ def update_profile(request):
         request.user.save()
         request.user.profile.save()
 
-    return redirect("/products/")
+    return redirect("/profile/")

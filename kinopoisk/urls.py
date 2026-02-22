@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import static
-from movies.views import home, movie_list, movie_detail, movies_by_genre, movie_create 
+from movies.views import home, movie_list, movie_detail, movies_by_genre, movie_create, delete_movie
 from django.conf import settings
 from users.views import register, login_user, logout_user, profile, update_profile
 
@@ -37,5 +37,6 @@ urlpatterns = [
     path("movies/<int:movie_id>/", movie_detail),
     path("movies/genre/<int:genre_id>/", movies_by_genre),
     path("movie_create/", movie_create),
+    path("movie_delete/<int:movie_id>/", delete_movie),
     *users
 ] + static.static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
