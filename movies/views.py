@@ -4,6 +4,7 @@ from .forms import CreateMovieForm, SearchForm
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.views.generic import ListView
 
 # select * from product;
 # Product.objects.all()
@@ -32,6 +33,54 @@ from django.db.models import Q
 #
 # FBV -> Function Based View
 # CBV -> Class Based View
+
+
+class MovieListView(ListView):
+    model = Movie
+    template_name = "movies/movie_list.html"
+    context_object_name = "movies"
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        search = self.request.GET.get("search")
+        year_choice = self.request.GET.get("year_choice")
+        genre_id = self.request.GET.get("genre_id")
+
+    
+        if search:
+            queryset = queryset.filter(
+                Q(title__icontains=search) |
+                Q(description__icontains=search)
+            )
+
+    
+        if year_choice:
+            if year_choice == "2026":
+                queryset = queryset.filter(year=2026)
+            elif year_choice == "2025":
+                queryset = queryset.filter(year=2025)
+            elif year_choice == "2024":
+                queryset = queryset.filter(year=2024)
+            elif year_choice == "2020_2023":
+                queryset = queryset.filter(year__range=(2020, 2023))
+
+
+        if genre_id:
+            queryset = queryset.filter(genre_id=genre_id)
+
+        return queryset
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["genres"] = Genre.objects.all()
+        context["search_value"] = self.request.GET.get("search", "")
+        context["selected_year"] = self.request.GET.get("year_choice", "")
+        context["selected_genres"] = self.request.GET.getlist("genre_id")
+
+        return context
+
 
 
 @login_required(login_url="/login/")
